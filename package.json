@@ -1,0 +1,25 @@
+{
+  "name": "spx-ble-adapter",
+  "version": "1.0.0",
+  "description": "SPX BLE Adapter: a lightweight service that exposes a configurable BLE peripheral controlled by SPX models. Via a simple HTTP/JSON Control API, SPX can define GATT services/characteristics and push values (Notify). macOS CoreBluetooth and Linux BlueZ backends supported. Ships as a standalone binary. Includes examples, OpenAPI spec, docs, and tests.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node --test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HammerHeads-Engineers/spx-ble-adapter.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/HammerHeads-Engineers/spx-ble-adapter/issues"
+  },
+  "homepage": "https://github.com/HammerHeads-Engineers/spx-ble-adapter#readme",
+  "dependencies": {
+    "@abandonware/bleno": "^0.6.2"
+  }
+}

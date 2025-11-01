@@ -1,0 +1,52 @@
+{
+  "device": {
+    "name": "SPX-Sim",
+    "advertiseServiceUuids": ["181a"],
+    "manufacturerData": null,
+    "intervalMs": 100
+  },
+  "state": {
+    "temperatureC": 22.0
+  },
+  "services": [
+    {
+      "uuid": "181a",
+      "name": "Environmental Sensing",
+      "characteristics": [
+        {
+          "uuid": "2a6e",
+          "name": "Temperature",
+          "properties": ["read"],
+          "value": { "source": "state", "key": "temperatureC" },
+          "codec": { "format": "sint16", "scale": 0.01, "unit": "celsius" },
+          "descriptors": [
+            { "uuid": "2901", "value": "Temperature (Celsius, 0.01 deg)" }
+          ]
+        },
+        {
+          "uuid": "f0c09111-8b3a-4e69-bdd0-9f0f613d1a90",
+          "name": "Command",
+          "properties": ["write"],
+          "codec": { "format": "utf8" },
+          "onWrite": [
+            { "action": "log", "template": "[BLE] write payload: {{value}}" },
+            {
+              "action": "parse",
+              "type": "float",
+              "clamp": { "min": -40, "max": 125 },
+              "target": "state",
+              "key": "temperatureC"
+            },
+            {
+              "action": "log",
+              "template": "[BLE] emit event -> device={{deviceName}} characteristic={{uuid}} value={{value}}"
+            }
+          ],
+          "descriptors": [
+            { "uuid": "2901", "value": "Command (UTF-8 string)" }
+          ]
+        }
+      ]
+    }
+  ]
+}
