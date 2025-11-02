@@ -1,33 +1,38 @@
 const bleno = require('@abandonware/bleno');
-const { loadConfig } = require('./lib/config');
 const { createState } = require('./lib/state');
-const { buildServices } = require('./lib/build-services');
+const { loadConfig } = require('./lib/config');
+const { AdapterController } = require('./lib/controller');
+const { createHttpServer } = require('./server/http');
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
-let configData;
-let configPath;
+const HTTP_PORT = Number.parseInt(process.env.HTTP_PORT || '8080', 10);
+const HTTP_HOST = process.env.HTTP_HOST || '0.0.0.0';
 
+let initialConfigData;
+let initialConfigPath;
 try {
   const { data, path: resolvedPath } = loadConfig();
-  configData = data;
-  configPath = resolvedPath;
-  console.log('[CONFIG] loaded', configPath);
+  initialConfigData = data;
+  initialConfigPath = resolvedPath;
+  console.log('[CONFIG] loaded', initialConfigPath);
 } catch (err) {
   console.error('[CONFIG] failed to load:', err.message);
   process.exit(1);
 }
 
-const deviceName = process.env.BLE_DEVICE_NAME || configData.device.name;
-const advertiseUuids = configData.device.advertiseServiceUuids || [];
-
-const state = createState(configData.state || {});
-let services;
+const state = createState(initialConfigData.state || {});
+const controller = new AdapterController({
+  bleno,
+  state,
+  configData: initialConfigData,
+  configPath: initialConfigPath,
+});
 
 try {
-  services = buildServices(configData, state);
+  controller.init();
 } catch (err) {
   console.error('[BLE] failed to build services:', err.message);
   process.exit(1);
@@ -36,9 +41,13 @@ try {
 bleno.on('stateChange', (stateChange) => {
   console.log('[BLE] state:', stateChange);
   if (stateChange === 'poweredOn') {
-    bleno.startAdvertising(deviceName, advertiseUuids, (err) => {
+    if (!controller.hasServices()) {
+      console.log('[BLE] no services configured yet – waiting for HTTP /config');
+      return;
+    }
+    bleno.startAdvertising(controller.getDeviceName(), controller.getAdvertisedUuids(), (err) => {
       if (err) console.error('[BLE] adv error:', err);
-      else console.log('[BLE] advertising as', deviceName);
+      else console.log('[BLE] advertising as', controller.getDeviceName());
     });
   } else {
     bleno.stopAdvertising();
@@ -47,10 +56,13 @@ bleno.on('stateChange', (stateChange) => {
 
 bleno.on('advertisingStart', (err) => {
   if (err) return console.error('[BLE] advertisingStart error:', err);
-  bleno.setServices(services, (setErr) => {
-    if (setErr) console.error('[BLE] setServices error:', setErr);
-    else console.log('[BLE] services set from config');
-  });
+  if (!controller.hasServices()) {
+    console.log('[BLE] skip setServices – no services defined');
+    return;
+  }
+  controller.applyServices()
+    .then(() => console.log('[BLE] services set from config'))
+    .catch((setErr) => console.error('[BLE] setServices error:', setErr));
 });
 
 // mały „oddech” wartości co 2s, jeśli mamy temperaturę w stanie
@@ -61,3 +73,16 @@ setInterval(() => {
     state.set('temperatureC', clamp(current + drift, -40, 125));
   }
 }, 2000);
+
+const httpServer = createHttpServer({
+  port: HTTP_PORT,
+  host: HTTP_HOST,
+  controller,
+});
+
+httpServer.listen().then((port) => {
+  console.log(`[HTTP] server listening on ${HTTP_HOST}:${port}`);
+}).catch((err) => {
+  console.error('[HTTP] failed to start server:', err);
+  process.exit(1);
+});

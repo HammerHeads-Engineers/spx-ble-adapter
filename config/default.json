@@ -1,0 +1,10 @@
+{
+  "device": {
+    "name": "BLE-Adapter",
+    "advertiseServiceUuids": [],
+    "manufacturerData": null,
+    "intervalMs": 100
+  },
+  "state": {},
+  "services": []
+}

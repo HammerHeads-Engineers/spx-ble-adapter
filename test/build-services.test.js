@@ -92,3 +92,81 @@ test('buildServices write characteristic decodes value and runs actions', async 
     });
   });
 });
+
+test('notify characteristic pushes on state change', async (t) => {
+  const config = {
+    device: { name: 'Notifier' },
+    services: [
+      {
+        uuid: '1234',
+        characteristics: [
+          {
+            uuid: 'abcd',
+            name: 'Temperature',
+            properties: ['read', 'notify'],
+            value: { source: 'state', key: 'temperature' },
+            codec: { format: 'float' },
+          },
+        ],
+      },
+    ],
+  };
+
+  const state = createState({ temperature: 21 });
+  const services = buildServices(config, state);
+  const characteristic = services[0].characteristics[0];
+
+  const notifications = [];
+
+  characteristic.onSubscribe(20, (buffer) => {
+    notifications.push(buffer.readFloatLE(0));
+  });
+
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  state.set('temperature', 22.5);
+  await new Promise((resolve) => setTimeout(resolve, 10));
+
+  const beforeUnsub = notifications.length;
+  characteristic.onUnsubscribe();
+  state.set('temperature', 23.5);
+  await new Promise((resolve) => setTimeout(resolve, 10));
+
+  assert.ok(beforeUnsub >= 2, 'should receive initial and update notification');
+  assert.ok(notifications.some((v) => Math.abs(v - 22.5) < 1e-3));
+  assert.strictEqual(notifications.length, beforeUnsub);
+});
+
+test('notify characteristic supports timer trigger', async () => {
+  const config = {
+    device: { name: 'NotifierTimer' },
+    services: [
+      {
+        uuid: '9999',
+        characteristics: [
+          {
+            uuid: 'eeee',
+            name: 'Heartbeat',
+            properties: ['notify'],
+            value: { source: 'literal', value: 1 },
+            codec: { format: 'float' },
+            notify: { triggers: ['timer'], intervalMs: 15 },
+          },
+        ],
+      },
+    ],
+  };
+
+  const state = createState({});
+  const services = buildServices(config, state);
+  const characteristic = services[0].characteristics[0];
+
+  const notifications = [];
+  characteristic.onSubscribe(20, (buffer) => {
+    notifications.push(buffer.readFloatLE(0));
+  });
+
+  await new Promise((resolve) => setTimeout(resolve, 60));
+  characteristic.onUnsubscribe();
+
+  assert.ok(notifications.length >= 3, 'should emit multiple timer notifications');
+});

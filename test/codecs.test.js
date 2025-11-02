@@ -34,3 +34,11 @@ test('encode/decode utf8 strings', () => {
   const decoded = decodeValue(buffer, codec);
   assert.strictEqual(decoded, 'Hello');
 });
+
+test('encode/decode float', () => {
+  const codec = { format: 'float' };
+  const buffer = encodeValue(12.5, codec);
+  assert.strictEqual(buffer.length, 4);
+  const decoded = decodeValue(buffer, codec);
+  assert.ok(Math.abs(decoded - 12.5) < 1e-6);
+});
