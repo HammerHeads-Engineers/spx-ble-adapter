@@ -3,6 +3,17 @@
   "version": "1.0.0",
   "description": "SPX BLE Adapter: a lightweight service that exposes a configurable BLE peripheral controlled by SPX models. Via a simple HTTP/JSON Control API, SPX can define GATT services/characteristics and push values (Notify). macOS CoreBluetooth and Linux BlueZ backends supported. Ships as a standalone binary. Includes examples, OpenAPI spec, docs, and tests.",
   "main": "index.js",
+  "bin": {
+    "spx-ble-adapter": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "lib",
+    "server",
+    "config",
+    "README.md",
+    "package.json"
+  ],
   "scripts": {
     "start": "node index.js",
     "test": "node --test"

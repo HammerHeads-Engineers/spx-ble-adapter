@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const bleno = require('@abandonware/bleno');
 const { createState } = require('./lib/state');
 const { loadConfig } = require('./lib/config');
