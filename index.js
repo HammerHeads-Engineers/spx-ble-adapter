@@ -9,7 +9,7 @@ function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
-const HTTP_PORT = Number.parseInt(process.env.HTTP_PORT || '8080', 10);
+const HTTP_PORT = Number.parseInt(process.env.HTTP_PORT || '8085', 10);
 const HTTP_HOST = process.env.HTTP_HOST || '0.0.0.0';
 
 let initialConfigData;

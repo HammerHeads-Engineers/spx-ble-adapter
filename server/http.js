@@ -31,7 +31,7 @@ async function routeRequest(controller, method, url, body) {
   return { status: 404 };
 }
 
-function createHttpServer({ port = 8080, host = '0.0.0.0', controller }) {
+function createHttpServer({ port = 8085, host = '0.0.0.0', controller }) {
   if (!controller) throw new Error('HTTP server requires a controller');
 
   const server = http.createServer(async (req, res) => {

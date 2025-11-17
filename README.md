@@ -36,7 +36,7 @@ npm start
 - To load a custom config, add a file under `config/` and start with `BLE_DEVICE_CONFIG=/path/to/config.json npm start`.
 
 ## HTTP API
-- HTTP server binds `0.0.0.0:8080` by default (`HTTP_HOST`, `HTTP_PORT` can override).
+- HTTP server binds `0.0.0.0:8085` by default (`HTTP_HOST`, `HTTP_PORT` can override).
 - Endpoints:
   - `GET /health` – adapter status, device name, last config update.
   - `GET /config` – current config (path + JSON data).
