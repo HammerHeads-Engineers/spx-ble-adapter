@@ -43,8 +43,7 @@ bleno.on('stateChange', (stateChange) => {
   console.log('[BLE] state:', stateChange);
   if (stateChange === 'poweredOn') {
     if (!controller.hasServices()) {
-      console.log('[BLE] no services configured yet – waiting for HTTP /config');
-      return;
+      console.log('[BLE] no services configured yet – advertising name only (waiting for HTTP /config)');
     }
     bleno.startAdvertising(controller.getDeviceName(), controller.getAdvertisedUuids(), (err) => {
       if (err) console.error('[BLE] adv error:', err);

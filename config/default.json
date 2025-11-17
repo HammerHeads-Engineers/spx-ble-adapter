@@ -1,6 +1,6 @@
 {
   "device": {
-    "name": "BLE-Adapter",
+    "name": "SPX-Sim",
     "advertiseServiceUuids": [],
     "manufacturerData": null,
     "intervalMs": 100
