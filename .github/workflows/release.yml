@@ -16,7 +16,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
@@ -31,15 +30,13 @@ jobs:
         env:
           npm_config_cache: .npm-cache
 
-      - name: Configure npm for GitHub Packages
-        run: |
-          echo "@hammerheads-engineers:registry=https://npm.pkg.github.com" > ~/.npmrc
-          echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" >> ~/.npmrc
+      - name: Configure npm for npmjs
+        run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish to GitHub Packages
-        run: npm publish --access=public
+      - name: Publish to npmjs
+        run: npm publish --access public
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v1
